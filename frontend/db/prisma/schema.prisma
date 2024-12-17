@@ -14,13 +14,13 @@ datasource db {
 }
 
 model User {
- id        Int    @id @default(autoincrement())
- firstName String
- lastName  String
- email     String  @unique
- password  String
- zaps      Zap[]
- createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  password  String?  // Make the password field nullable
+  zaps      Zap[]
+  createdAt DateTime @default(now())
 }
 
 model Zap {
