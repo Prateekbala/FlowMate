@@ -19,8 +19,8 @@ const Home: React.FC = () => {
         <h1 className="text-xl font-bold text-primary">FlowMate</h1>
         <div>
           <button
-            onClick={() => navigateTo("/login")}
-            className="px-4 py-2 text-primary hover:underline"
+            onClick={() => navigateTo("/sign-in")}
+            className="ml-4 px-5 py-2 bg-primary text-white rounded hover:bg-indigo-700"
           >
             Log in
           </button>
@@ -46,13 +46,13 @@ const Home: React.FC = () => {
         {/* Buttons */}
         <div className="mt-8 flex justify-center space-x-4">
           <button
-            onClick={() => navigateTo("/signup")}
+            onClick={() => navigateTo("/sign-up")}
             className="px-6 py-3 bg-accent text-white rounded shadow hover:bg-orange-600"
           >
             Start free with email
           </button>
           <button
-            onClick={() => navigateTo("/signup/google")}
+            onClick={() => navigateTo("/sign-up")}
             className="px-6 py-3 border border-gray-300 rounded hover:bg-gray-100"
           >
             Start with Google
