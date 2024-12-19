@@ -33,10 +33,9 @@ const SignupPage: React.FC = () => {
       } else {
         setServerError(response.data.error || "Failed to sign up");
       }
-    } catch (err: any) {
-      setServerError(
-        err.response?.data?.error || "An error occurred. Please try again."
-      );
+    } catch (e) {
+      setServerError("An error occurred. Please try again.");
+      console.log(e);
     }
   };
 

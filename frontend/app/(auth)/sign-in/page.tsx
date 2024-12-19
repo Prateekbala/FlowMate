@@ -43,8 +43,9 @@ const SignInPage: React.FC = () => {
   const handleOAuthSignIn = async (provider: string) => {
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
-    } catch (err) {
+    } catch (e) {
       setServerError("Failed to sign in. Please try again.");
+      console.log(e);
     }
   };
 

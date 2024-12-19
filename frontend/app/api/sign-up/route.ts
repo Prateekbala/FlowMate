@@ -49,11 +49,11 @@ export async function POST(req: NextRequest) {
       { message: "User registered successfully" },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Signup error:", error);
 
     return NextResponse.json(
-      { error: "Internal Server Error", details: error.message },
+      { error: "Internal Server Error", details: error },
       { status: 500 }
     );
   }
