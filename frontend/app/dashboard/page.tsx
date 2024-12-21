@@ -1,22 +1,16 @@
 "use client";
 import { useState } from "react";
-
+import axios from "axios";
+import { signOut } from "next-auth/react";
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState({ x: 200, y: 200 });
   const [showModal, setShowModal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
-  const [selectedAction, setSelectedAction] = useState("");
+  const [selectedTrigger, setSelectedTrigger] = useState("");
+  const [email, setEmail] = useState("");
 
-  const actions = [
-    "AI by Zapier",
-    "Filter",
-    "Formatter",
-    "Paths",
-    "Webhooks",
-    "Code",
-    "Looping",
-  ];
+  const triggers = ["Convert invoices to Excel", "Other Trigger"];
 
   // Background dragging handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -42,10 +36,29 @@ export default function Home() {
     setShowModal(true);
   };
 
-  const handleActionSelect = (action: string) => {
-    setSelectedAction(action);
+  const handleTriggerSelect = (trigger: string) => {
+    setSelectedTrigger(trigger);
     setShowModal(false);
     setShowSidebar(true);
+  };
+
+  const handleAccessRequest = async () => {
+    try {
+      const response = await axios.post("/api/gmail/request-access", { email });
+
+      if (response.status === 200 && response.data.authUrl) {
+        window.open(response.data.authUrl, "_blank");
+        alert("Please authorize Gmail access in the new tab.");
+      } else {
+        alert(`Error: ${response.data.error}`);
+      }
+    } catch (error: any) {
+      console.error("Failed to request Gmail access:", error);
+      alert(`Error: ${error.response?.data?.error || "Unknown error"}`);
+    }
+  };
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/" }); // Redirect to homepage or any other page after sign out
   };
 
   return (
@@ -59,6 +72,12 @@ export default function Home() {
           </button>
           <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
             Publish
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Sign-out
           </button>
         </div>
       </nav>
@@ -95,21 +114,6 @@ export default function Home() {
               </h2>
             </div>
           </div>
-
-          {/* Action Box */}
-          <div
-            className="border-2 border-dotted border-gray-400 bg-white shadow-md rounded-md p-4 w-96 cursor-pointer"
-            onClick={handleTriggerClick}
-          >
-            <div className="flex items-center space-x-2">
-              <span className="bg-gray-300 text-gray-800 px-2 py-1 rounded text-xs font-semibold">
-                ⚙️ Action
-              </span>
-              <h2 className="text-lg font-semibold text-gray-700">
-                2. Select the event for your Zap to run
-              </h2>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -117,15 +121,15 @@ export default function Home() {
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-md shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Select an Action</h2>
+            <h2 className="text-xl font-semibold mb-4">Select a Trigger</h2>
             <ul className="space-y-2">
-              {actions.map((action) => (
+              {triggers.map((trigger) => (
                 <li
-                  key={action}
+                  key={trigger}
                   className="cursor-pointer hover:bg-gray-200 p-2 rounded"
-                  onClick={() => handleActionSelect(action)}
+                  onClick={() => handleTriggerSelect(trigger)}
                 >
-                  {action}
+                  {trigger}
                 </li>
               ))}
             </ul>
@@ -145,26 +149,38 @@ export default function Home() {
           className="fixed top-0 right-0 h-full w-80 bg-white shadow-lg p-6 transition-transform transform translate-x-0"
           style={{ transition: "transform 0.3s ease-in-out" }}
         >
-          <h2 className="text-xl font-semibold mb-4">Configure Action</h2>
+          <h2 className="text-xl font-semibold mb-4">Configure Trigger</h2>
           <label className="block mb-2 text-gray-700 font-medium">
-            Selected Action:
+            Selected Trigger:
           </label>
-          <select
-            className="w-full p-2 border border-gray-300 rounded-md"
-            value={selectedAction}
-            onChange={(e) => setSelectedAction(e.target.value)}
-          >
-            {actions.map((action) => (
-              <option key={action} value={action}>
-                {action}
-              </option>
-            ))}
-          </select>
+          <p className="mb-4 text-gray-600">{selectedTrigger}</p>
+
+          {selectedTrigger === "Convert invoices to Excel" && (
+            <>
+              <label className="block mb-2 text-gray-700 font-medium">
+                Enter Email:
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full p-2 border border-gray-300 rounded-md mb-4"
+              />
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                onClick={handleAccessRequest}
+              >
+                Request Gmail Access
+              </button>
+            </>
+          )}
+
           <button
-            className="mt-6 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            className="mt-6 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
             onClick={() => setShowSidebar(false)}
           >
-            Save
+            Close
           </button>
         </div>
       )}

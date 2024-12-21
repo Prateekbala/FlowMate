@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,68 +11,86 @@ datasource db {
 }
 
 model User {
- id        Int    @id @default(autoincrement())
- firstName String
- lastName  String
- email     String  @unique
- password  String
- zaps      Zap[]
- createdAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  email     String    @unique
+  firstName String?
+  lastName  String?
+  password  String?
+  zaps      Zap[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())  
 }
 
 model Zap {
-  id           String  @id @default(uuid())
-  triggerId    String
-  userId       Int
-  trigger      Trigger?
-  actions      Action[]
-  zapRuns      ZapRun[]
-  user         User @relation(fields: [userId], references: [id])
+  id          String    @id @default(cuid())
+  name        String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  trigger     Trigger?
+  token       Token?
+  actions     Action[]
+  status      String    @default("draft") // draft, active, paused, error
+  createdAt   DateTime  @default(now())
+  zapRuns     ZapRun[]
+}
+
+model Token {
+  id           String    @id @default(cuid())
+  zapId        String    @unique
+  zap          Zap       @relation(fields: [zapId], references: [id])
+  provider     String    // e.g. "gmail"
+  accessToken  String    @db.Text
+  refreshToken String?   @db.Text
+  expiresAt    DateTime
 }
 
 model Trigger {
-  id          String  @id @default(uuid())
-  zapId       String  @unique
-  triggerId   String
-  metadata    Json  @default("{}")
-  type  AvailableTrigger @relation(fields: [triggerId], references: [id])
-  zap  Zap                @relation(fields: [zapId], references: [id])
+  id        String           @id @default(uuid())
+  zapId     String          @unique
+  triggerId String
+  metadata  Json            @default("{}")
+  type      AvailableTrigger @relation(fields: [triggerId], references: [id])
+  zap       Zap             @relation(fields: [zapId], references: [id])
 }
 
 model Action {
-  id        String  @id @default(uuid())
-  zapId     String  
-  zap       Zap     @relation(fields: [zapId], references: [id])
-  actionId  String
-  metadata    Json  @default("{}")
-  type      AvailableAction @relation(fields: [actionId], references: [id])
-  sortingOrder Int    @default(0)
+  id           String          @id @default(uuid())
+  zapId        String
+  zap          Zap            @relation(fields: [zapId], references: [id])
+  actionId     String
+  metadata     Json           @default("{}")
+  type         AvailableAction @relation(fields: [actionId], references: [id])
+  sortingOrder Int            @default(0)
+
+  @@index([zapId])
 }
 
 model AvailableAction {
-  id       String @id @default(uuid())
-  name     String
-  image    String
-  actions  Action[]
+  id      String   @id @default(uuid())
+  name    String
+  image   String
+  actions Action[]
 }
 
 model AvailableTrigger {
-  id       String @id @default(uuid())
-  name     String 
+  id       String    @id @default(uuid())
+  name     String
   image    String
   triggers Trigger[]
 }
 
 model ZapRun {
-  id           String @id @default(uuid())
+  id           String         @id @default(uuid())
   zapId        String
   metadata     Json
-  zap          Zap @relation(fields: [zapId], references: [id])
+  zap          Zap           @relation(fields: [zapId], references: [id])
   zapRunOutbox ZapRunOutbox?
+
+  @@index([zapId])
 }
 
 model ZapRunOutbox {
-  id          String @id @default(uuid())
-  zapRunId    String @unique
-  zapRun      ZapRun @relation(fields: [zapRunId], references: [id])
+  id       String @id @default(uuid())
+  zapRunId String @unique
+  zapRun   ZapRun @relation(fields: [zapRunId], references: [id])
 }

@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
 
     const { email, password, firstName, lastName } = parseResult.data;
 
-    // Check for existing user
     const existingUser = await db.user.findFirst({
       where: { email },
     });
@@ -32,7 +31,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create new user
@@ -50,10 +48,8 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error: unknown) {
-    console.error("Signup error:", error);
-
     return NextResponse.json(
-      { error: "Internal Server Error", details: error },
+      { error: "Internal Server Error", details: String(error) },
       { status: 500 }
     );
   }

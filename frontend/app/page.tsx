@@ -1,16 +1,13 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 const Home: React.FC = () => {
   const router = useRouter();
 
   const navigateTo = (path: string) => {
     router.push(path);
   };
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" }); // Redirect to homepage or any other page after sign out
-  };
+
 
   return (
     <div className="min-h-screen bg-background text-gray-800">
@@ -82,12 +79,7 @@ const Home: React.FC = () => {
           &copy; 2024 My Automate App. All rights reserved.
         </p>
       </footer>
-      <button
-        onClick={handleSignOut}
-        className="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600"
-      >
-        Sign Out
-      </button>
+   
     </div>
   );
 };
