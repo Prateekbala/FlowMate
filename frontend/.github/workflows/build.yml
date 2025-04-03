@@ -1,8 +1,9 @@
-name: Build on PR sucess
+name: Build on PR success
 
 on:
   pull_request:
-    branches: -main
+    branches:
+      - main
 
 jobs:
   build:
@@ -21,3 +22,6 @@ jobs:
 
       - name: Build
         run: cd frontend && npm run build
+
+      - name: Generate Prisma client
+        run: cd frontend && npm run db:generate
